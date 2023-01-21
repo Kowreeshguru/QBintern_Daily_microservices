@@ -1,46 +1,49 @@
 package com.quinbay.service3.model;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 
+@Entity
 public class Retailer {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    int id;
+    @Column(unique= true)
     public  int r_id;
+    @Column
     String r_name;
-    public ArrayList<Wholesaler> retail_wholesalerlist=new ArrayList<>();
     Retailer(){}
+
 
     public int getR_id() {
         return r_id;
     }
 
-    public void setW_id(int r_id) {
+    public void setR_id(int r_id) {
         this.r_id = r_id;
-    }
-
-    public ArrayList<Wholesaler> getRetail_wholesalerlist() {
-        return retail_wholesalerlist;
-    }
-
-    public void setRetail_wholesalerlist(ArrayList<Wholesaler> retail_wholesalerlist) {
-        this.retail_wholesalerlist = retail_wholesalerlist;
     }
 
     public String getR_name() {
         return r_name;
     }
 
-    public void setW_name(String r_name) {
+    public void setR_name(String r_name) {
         this.r_name = r_name;
     }
 
 
+    public int getId() {
+        return id;
+    }
 
-    public Retailer(int id, String name){
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Retailer(int id, int r_id,String name){
         this.r_id=id;
+        this.id=id;
         this.r_name=name;
-        this.retail_wholesalerlist= new ArrayList<Wholesaler>();
-//        Product prod1=new Product(100,"iphone12",1000,45000,12);
-//        Product prod2=new Product(101,"iphone13",1000,50000,15);
-//        retail_productlist.add(prod1);
-//        retail_productlist.add(prod2);
+
     }
 }

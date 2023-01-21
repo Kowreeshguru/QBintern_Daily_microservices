@@ -1,91 +1,65 @@
 package com.quinbay.service3.service;
 
-import com.quinbay.service3.model.Product;
+import com.quinbay.service3.Interface.RetailerInterface;
+import com.quinbay.service3.Kafka.KafkaPublishingService;
+import com.quinbay.service3.Repository.RetailerInventoryRepository;
+import com.quinbay.service3.Repository.RetailerRepository;
+import com.quinbay.service3.model.BillDetails;
 import com.quinbay.service3.model.Retailer;
-import com.quinbay.service3.model.Wholesaler;
+import com.quinbay.service3.model.RetailerInventory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
 @Service
-public class RetailerOp
+public class RetailerOp implements RetailerInterface
 {
-    public static ArrayList<Retailer> retailer = new ArrayList<>();
-    public Retailer disp_retailer(int id) {
-        Retailer ans = null;
-        for (Retailer temp_retail : retailer) {
-            if (temp_retail.getR_id() == id) {
-                ans = temp_retail;
-            }
-        }
-        return ans;
+    @Autowired
+    RetailerRepository retailrepo;
+    @Autowired
+    KafkaPublishingService kafkaPublishingService;
+
+    //    public static ArrayList<Product> product = new ArrayList<>();
+    @Override
+    public ArrayList<Retailer> disp_retail() {
+        return (ArrayList<Retailer>) retailrepo.findAll();
     }
 
-    public Retailer add_retailer(Retailer add_retail) {
-//        for(Wholesaler whole: add_whole){
-        retailer.add(add_retail);
-//        }
-//        wholesaler.add(whole);
-        return add_retail;
+    public Retailer add_retail(Retailer add_retail) {
+        return retailrepo.save(add_retail);
+    }
+    public Retailer get_retail_byId(int retialId){
+        try {
+            BillDetails det= new BillDetails("Warehouse1",311,"MacBook pro",165000,161000,18,169000);
+            kafkaPublishingService.retailerInformation(det);
+            return retailrepo.findById(retialId);
+        }catch (Exception e){
+            return null;
+        }
+
+    }
+    public ResponseEntity<String> update_retail(int id, String val){
+        try {
+            Retailer retail = retailrepo.findById(id);
+            retail.setR_name(val);
+            retailrepo.save(retail);
+            return new ResponseEntity("Successfully update",HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity("Not updated, ID not found",HttpStatus.BAD_REQUEST);
+        }
+
     }
 
-    public void upd_retailer(int id, String name){
-        for(Retailer temp_retail: retailer) {
-            if (temp_retail.getR_id() == id) {
-                temp_retail.setW_name(name);
-            }
+    public String remove_retail(int id){
+        try{
+            retailrepo.deleteById(id);
+            return ("Deleted successfully");
+        }catch(Exception e){
+            return ("Not deleted");
         }
-    }
 
-    public void allocate_wholesaler(int rid,Wholesaler whole, Product prod, int val){
-        System.out.println("inside");
-        for(Retailer temp_retail: retailer) {
-            if (temp_retail.getR_id() == rid) {
-                System.out.println("retail");
-                if(temp_retail.retail_wholesalerlist.isEmpty()){
-                    temp_retail.retail_wholesalerlist.add(whole);
-                }
-                else {
-                    boolean flag=true;
-                    for(Wholesaler temp_whole:temp_retail.retail_wholesalerlist){
-                        if(temp_whole.getW_id()==whole.getW_id()){
-                            flag=false;
-                            prod.stock=val;
-                            temp_whole.whole_productlist.add(prod);
-                        }
-                    }
-                    if(!flag){
-                        prod.stock=val;
-                        whole.whole_productlist.add(prod);
-                        temp_retail.retail_wholesalerlist.add(whole);
-                    }
-                }
-            }
-        }
-    }
-
-    public void remove_retailer(int id){
-        for(Retailer temp_whole: retailer) {
-            if(temp_whole.getR_id() == id) {
-                retailer.remove(temp_whole);
-            }
-        }
     }
 }
-//for (Wholesaler temp_whole : temp_retail.retail_wholesalerlist) {
-//        if (temp_whole.getW_id() == whole.getW_id()) {
-//
-//        if (temp_whole.getWhole_productlist().isEmpty()) {
-//        prod.stock = val;
-//        temp_whole.getWhole_productlist().add(prod);
-//        } else {
-//        for (Product temp_product : temp_whole.getWhole_productlist()) {
-//        if (temp_product.id == prod.id) {
-//        temp_product.stock = temp_product.stock + val;
-//        } else {
-//        temp_whole.getWhole_productlist().add(prod);
-//        }
-//        }
-//        }
-//        }
-//        }

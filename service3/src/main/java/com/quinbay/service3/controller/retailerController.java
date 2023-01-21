@@ -1,59 +1,47 @@
 package com.quinbay.service3.controller;
 
-import com.quinbay.service3.model.Product;
 import com.quinbay.service3.model.Retailer;
-import com.quinbay.service3.model.Wholesaler;
 import com.quinbay.service3.service.RetailerOp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 @RestController
 @RequestMapping(value = "/retailer")
-public class retailerController {
-    @Autowired
-    RetailerOp retail;
-    @Autowired
-    RestTemplate restTemplate;
+public class RetailerController {
 
-    @GetMapping("/getRetailer")
-    public Retailer get_ret(@RequestParam int a) {
-        return retail.disp_retailer(a);
+    @Autowired
+    RetailerOp retailer;
+
+    @GetMapping("/getretailer")
+    public ArrayList<Retailer> get_retail(){
+        return retailer.disp_retail();
+    }
+
+    @GetMapping("/getRetail/{id}")
+    public Retailer get_retail_byId(@RequestParam int id){
+        return retailer.get_retail_byId(id);
     }
 
     @PostMapping("/addRetailer")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Retailer add_ret(@RequestBody Retailer a) {
-        return retail.add_retailer(a);
-    }
-    @PutMapping("/updateRetailer")
-    public String  upd_prod(@RequestParam int id,@RequestParam String val) {
-        retail.upd_retailer(id,val);
-        return "Wholesaler updated successfully";
+    public Retailer add_prod(@RequestBody Retailer a)
+    {
+        return retailer.add_retail(a);
     }
 
-    @DeleteMapping("/deleteRetailer")
-    public String det_prod(@RequestParam int id) {
-        retail.remove_retailer(id);
-        return "Wholesaler deleted successfully";
+    @PutMapping("/updateRetail")
+    public ResponseEntity<String> add_wareIn(@RequestParam int id, @RequestParam String val)
+    {
+        return retailer.update_retail(id, val);
     }
+    //
+    @DeleteMapping("/deleteRetail/{id}")
+    public String det_retail(@RequestParam int id) {
+        return retailer.remove_retail(id);
 
-    @PostMapping("/allocateRetailer")
-    public String add_service(@RequestParam int rid,@RequestParam int wid,@RequestParam int pid,@RequestParam int val ) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-//        String url= UriComponentsBuilder.fromHttpUrl("http://localhost:8080/product").queryParam("id",wid).queryParam("val",val).toUriString();
-        HttpEntity<String> entity = new HttpEntity<String>(headers);
-        Wholesaler whole=restTemplate.exchange("http://localhost:8080/product/getWholesaler?a="+wid,HttpMethod.GET,entity ,Wholesaler.class).getBody();
-        Product prod=restTemplate.exchange("http://localhost:8080/product/getProduct?a="+pid,HttpMethod.GET,entity ,Product.class).getBody();
-        retail.allocate_wholesaler(rid,whole,prod,val);
-//        return restTemplate.exchange(url,HttpMethod.PUT,entity ,String.class).getBody();
-        return null;
     }
 }

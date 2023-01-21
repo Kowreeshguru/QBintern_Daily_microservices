@@ -1,10 +1,22 @@
 package com.quinbay.service1.model;
 
+
+import javax.annotation.sql.DataSourceDefinition;
+import javax.persistence.*;
+
+@Entity
+//@Table
 public class Product{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int id;
+    @Column(name="p_id",unique = true)
+    public int p_id;
+    @Column(name="name")
     public String name;
-    public int stock;
+    @Column(name="price")
     public int price;
+    @Column(name="gst")
     public int gst;
 
 
@@ -16,20 +28,20 @@ public class Product{
         this.name = name;
     }
 
-    public int getStock() {
-        return stock;
-    }
-
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
     public int getPrice() {
         return price;
     }
 
     public void setPrice(int price) {
         this.price = price;
+    }
+
+    public void setP_id(int p_id) {
+        this.p_id = p_id;
+    }
+
+    public int getP_id() {
+        return p_id;
     }
 
     public int getGst() {
@@ -53,7 +65,6 @@ public class Product{
     public Product(int id, String name, int stock, int price, int gst){
         this.id=id;
         this.name=name;
-        this.stock=stock;
         this.price=price;
         this.gst=gst;
     }

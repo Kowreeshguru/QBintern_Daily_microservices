@@ -1,78 +1,71 @@
 package com.quinbay.service2.service;
 
-import com.quinbay.service2.model.Product;
+import com.quinbay.service2.Interface.WholesalerInterface;
+import com.quinbay.service2.Kafka.KafkaPublishingService;
+import com.quinbay.service2.model.BillDetails;
 import com.quinbay.service2.model.Wholesaler;
+import com.quinbay.service2.model.WholesalerInventory;
+import com.quinbay.service2.service2Repository.WholesalerInventoryRepository;
+import com.quinbay.service2.service2Repository.WholesalerRepository;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.SplittableRandom;
+
 @Service
-public class WholesalerOp {
-    public static ArrayList<Wholesaler> wholesaler = new ArrayList<>();
-    public Wholesaler disp_wholesaler(int id) {
-        Wholesaler ans = null;
-        for (Wholesaler temp_whole : wholesaler) {
-            if (temp_whole.getW_id() == id) {
-                ans = temp_whole;
-            }
-        }
-        return ans;
+public class WholesalerOp implements WholesalerInterface {
+    @Autowired
+    WholesalerRepository wholerepo;
+    @Autowired
+    KafkaPublishingService kafkaPublishingService;
+
+    //    public static ArrayList<Wholesaler> wholwsa = new ArrayList<>();
+    @Override
+    public ArrayList<Wholesaler> disp_wholesaler() {
+        return (ArrayList<Wholesaler>) wholerepo.findAll();
     }
 
     public Wholesaler add_wholesaler(Wholesaler add_whole) {
-//        for(Wholesaler whole: add_whole){
-            wholesaler.add(add_whole);
-//        }
-//        wholesaler.add(whole);
-        return add_whole;
+        return wholerepo.save(add_whole);
+    }
+//    @KafkaListener(topics="send.productInfo", groupId="warehouse")
+//    public void getProductInfo(ConsumerRecord<?,String> consumerRecord){
+//        Pr
+//    }
+    public Wholesaler get_wholesaler_byId(int wholesalerId){
+        try {
+            BillDetails det= new BillDetails("Warehouse1",231,"iphone12",65000,61000,18,69000);
+            kafkaPublishingService.wholesalerInformation(det);
+            return wholerepo.findById(wholesalerId);
+        }catch (Exception e){
+            return  null;
+        }
+
+    }
+    public ResponseEntity<String> update_wholesaler(int id, String val){
+        try {
+            Wholesaler wholesaler = wholerepo.findById(id);
+            wholesaler.setW_name(val);
+            wholerepo.save(wholesaler);
+            return new ResponseEntity("Successfully update",HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity("Not updated, Id not found",HttpStatus.BAD_REQUEST);
+        }
+
     }
 
-    public void upd_wholesaler(int id, String name){
-        for(Wholesaler temp_whole: wholesaler) {
-            if (temp_whole.getW_id() == id) {
-                temp_whole.setW_name(name);
-            }
+    public String remove_wholesaler(int id){
+        try{
+            wholerepo.deleteById(id);
+            return ("Deleted successfully");
+        }catch(Exception e){
+            return ("Not deleted");
         }
-    }
 
-    public void allocate_wholesaler(int wid,Product prod,int val){
-        System.out.println("inside");
-        for(Wholesaler temp_whole: wholesaler) {
-            if (temp_whole.getW_id() == wid) {
-                System.out.println("whole");
-                if(temp_whole.getWhole_productlist().isEmpty()){
-                    prod.stock=val;
-                    temp_whole.getWhole_productlist().add(prod);
-                }
-                else {
-                    for (Product temp_product : temp_whole.getWhole_productlist()) {
-                        if (temp_product.id == prod.id) {
-                            temp_product.stock = temp_product.stock + val;
-                        } else {
-                            temp_whole.getWhole_productlist().add(prod);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public void update_stock(int wid,int pid,int val){
-        for(Wholesaler temp_whole:wholesaler){
-            if(temp_whole.getW_id()==wid){
-                for(Product prod:temp_whole.getWhole_productlist()){
-                    if(prod.id==pid){
-                        prod.stock=prod.stock-val;
-                    }
-                }
-            }
-        }
-    }
-
-    public void remove_wholesaler(int id){
-        for(Wholesaler temp_whole: wholesaler) {
-            if(temp_whole.getW_id() == id) {
-                wholesaler.remove(temp_whole);
-            }
-        }
     }
 }
